@@ -134,7 +134,7 @@ for i in range(13):
                  round(100 + 95 * math.sin(2 * math.pi * i / 13)), 50, [113, 0, 192])
 
 img = Image.fromarray(image_matrix, mode='RGB')
-img.save('dotted_lines.png')
+img.save('lab1/dotted_lines.png')
 
 make_pink(image_matrix)
 for i in range(13):
@@ -142,7 +142,7 @@ for i in range(13):
                     round(100 + 95 * math.sin(2 * math.pi * i / 13)), [113, 0, 192])
 
 img = Image.fromarray(image_matrix, mode='RGB')
-img.save('dotted_lines_v2.png')
+img.save('lab1/dotted_lines_v2.png')
 
 make_pink(image_matrix)
 for i in range(13):
@@ -150,7 +150,7 @@ for i in range(13):
                 round(100 + 95 * math.sin(2 * math.pi * i / 13)), [113, 0, 192])
 
 img = Image.fromarray(image_matrix, mode='RGB')
-img.save('x_loop_line.png')
+img.save('lab1/x_loop_line.png')
 
 make_pink(image_matrix)
 for i in range(13):
@@ -158,7 +158,7 @@ for i in range(13):
                    round(100 + 95 * math.sin(2 * math.pi * i / 13)), [113, 0, 192])
 
 img = Image.fromarray(image_matrix, mode='RGB')
-img.save('x_loop_line_v2.png')
+img.save('lab1/x_loop_line_v2.png')
 
 make_pink(image_matrix)
 for i in range(13):
@@ -166,7 +166,7 @@ for i in range(13):
                    round(100 + 95 * math.sin(2 * math.pi * i / 13)), [113, 0, 192])
 
 img = Image.fromarray(image_matrix, mode='RGB')
-img.save('x_loop_line_v3.png')
+img.save('lab1/x_loop_line_v3.png')
 
 make_pink(image_matrix)
 for i in range(13):
@@ -174,59 +174,88 @@ for i in range(13):
                    round(100 + 95 * math.sin(2 * math.pi * i / 13)), [113, 0, 192])
 
 img = Image.fromarray(image_matrix, mode='RGB')
-img.save('bresenham_line.png')
+img.save('lab1/bresenham_line.png')
 
 # работа с модельками obj
 
 image_matrix2 = np.zeros((1000, 1000, 3), dtype=np.uint8)
 image_matrix2[0:1000, 0:1000] = [255, 0, 102]
-vertices, polygons = input_vertices("model_1.obj")  # кролик
-for i,v in enumerate(vertices):
-    vertices[i]=[(v[0] * 5000) + 500, (v[1] * 5000) + 250, (v[2] * 5000) + 500]
+vertices, polygons = input_vertices("lab1/model_1.obj")  # кролик
+for i, v in enumerate(vertices):
+    vertices[i] = [(v[0] * 5000) + 500, (v[1] * 5000) + 250, (v[2] * 5000) + 500]
     image_matrix2[round(vertices[i][1]), round(vertices[i][0])] = 255
 for p in polygons:
-    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]), round(vertices[p[1] - 1][0]),
+    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]),
+                   round(vertices[p[1] - 1][0]),
                    round(vertices[p[1] - 1][1]), 255)
-    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]), round(vertices[p[2] - 1][0]),
+    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]),
+                   round(vertices[p[2] - 1][0]),
                    round(vertices[p[2] - 1][1]), 255)
-    bresenham_line(image_matrix2, round(vertices[p[2] - 1][0]), round(vertices[p[2] - 1][1]), round(vertices[p[1] - 1][0]),
+    bresenham_line(image_matrix2, round(vertices[p[2] - 1][0]), round(vertices[p[2] - 1][1]),
+                   round(vertices[p[1] - 1][0]),
                    round(vertices[p[1] - 1][1]), 255)
 
 img = Image.fromarray(image_matrix2, mode='RGB')
 img = ImageOps.flip(img)
-img.save('model_1.png')
+img.save('lab1/model_1.png')
 
 image_matrix2[0:1000, 0:1000] = [255, 0, 102]
-vertices, polygons = input_vertices("model_2.obj")  # олень
-for i,v in enumerate(vertices):
-    vertices[i]=[(v[0] * 0.4) + 500, (v[1] * 0.4) + 250, (v[2] * 0.4) + 500]
+vertices, polygons = input_vertices("lab1/model_2.obj")  # олень
+for i, v in enumerate(vertices):
+    vertices[i] = [(v[0] * 0.4) + 500, (v[1] * 0.4) + 250, (v[2] * 0.4) + 500]
     image_matrix2[round(vertices[i][1]), round(vertices[i][0])] = 255
 for p in polygons:
-    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]), round(vertices[p[1] - 1][0]),
+    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]),
+                   round(vertices[p[1] - 1][0]),
                    round(vertices[p[1] - 1][1]), 255)
-    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]), round(vertices[p[2] - 1][0]),
+    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]),
+                   round(vertices[p[2] - 1][0]),
                    round(vertices[p[2] - 1][1]), 255)
-    bresenham_line(image_matrix2, round(vertices[p[2] - 1][0]), round(vertices[p[2] - 1][1]), round(vertices[p[1] - 1][0]),
+    bresenham_line(image_matrix2, round(vertices[p[2] - 1][0]), round(vertices[p[2] - 1][1]),
+                   round(vertices[p[1] - 1][0]),
                    round(vertices[p[1] - 1][1]), 255)
 
 img = Image.fromarray(image_matrix2, mode='RGB')
 img = ImageOps.flip(img)
-img.save('model_2.png')
-
+img.save('lab1/model_2.png')
 
 image_matrix2[0:1000, 0:1000] = [255, 0, 102]
-vertices, polygons = input_vertices("natsuki.obj")  # нацуки
-for i,v in enumerate(vertices):
-    vertices[i]=[(v[0] * 800) + 500, (v[1] * 800) + 150, (v[2] * 700) + 500]
+vertices, polygons = input_vertices("lab1/natsuki.obj")  # нацуки
+for i, v in enumerate(vertices):
+    vertices[i] = [(v[0] * 800) + 500, (v[1] * 800) + 150, (v[2] * 700) + 500]
     image_matrix2[round(vertices[i][1]), round(vertices[i][0])] = 255
 for p in polygons:
-    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]), round(vertices[p[1] - 1][0]),
+    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]),
+                   round(vertices[p[1] - 1][0]),
                    round(vertices[p[1] - 1][1]), 255)
-    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]), round(vertices[p[2] - 1][0]),
+    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]),
+                   round(vertices[p[2] - 1][0]),
                    round(vertices[p[2] - 1][1]), 255)
-    bresenham_line(image_matrix2, round(vertices[p[2] - 1][0]), round(vertices[p[2] - 1][1]), round(vertices[p[1] - 1][0]),
+    bresenham_line(image_matrix2, round(vertices[p[2] - 1][0]), round(vertices[p[2] - 1][1]),
+                   round(vertices[p[1] - 1][0]),
                    round(vertices[p[1] - 1][1]), 255)
 
 img = Image.fromarray(image_matrix2, mode='RGB')
 img = ImageOps.flip(img)
-img.save('natsuki.png')
+img.save('lab1/natsuki.png')
+
+image_matrix2[0:1000, 0:1000] = [255, 0, 102]
+vertices, polygons = input_vertices("lab1/cat.obj")  # кошка
+for i, v in enumerate(vertices):
+    vertices[i] = [(v[0] * 10) + 500, (v[1] * 10) + 500, (v[2] * 10) + 500]
+    # vertices[i] = [(v[0] * 10) + 500, (v[2] * 10) + 300, (v[1] * 10) + 500] #поменяла местами оси, так получилась кошка спереди
+    image_matrix2[round(vertices[i][1]), round(vertices[i][0])] = 255
+for p in polygons:
+    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]),
+                   round(vertices[p[1] - 1][0]),
+                   round(vertices[p[1] - 1][1]), 255)
+    bresenham_line(image_matrix2, round(vertices[p[0] - 1][0]), round(vertices[p[0] - 1][1]),
+                   round(vertices[p[2] - 1][0]),
+                   round(vertices[p[2] - 1][1]), 255)
+    bresenham_line(image_matrix2, round(vertices[p[2] - 1][0]), round(vertices[p[2] - 1][1]),
+                   round(vertices[p[1] - 1][0]),
+                   round(vertices[p[1] - 1][1]), 255)
+
+img = Image.fromarray(image_matrix2, mode='RGB')
+img = ImageOps.flip(img)
+img.save('lab1/cat.png')
