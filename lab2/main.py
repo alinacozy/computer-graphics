@@ -35,27 +35,58 @@ def baricentic(x, y, x0, y0, x1, y1, x2, y2):
     return lambda0, lambda1, lambda2
 
 
-def pict(x0, y0, x1, y1, x2, y2, image_matrix, color):
+def normal(x0, y0, z0, x1, y1, z1, x2, y2, z2):
+    n = np.cross([x1 - x2, y1 - y2, z1 - z2], [x1 - x0, y1 - y0, z1 - z0])
+    return n
+
+
+def pict(x0, y0, z0, x1, y1, z1, x2, y2, z2, image_matrix, color):
     xmin = round(max(min(x0, x1, x2), 0))
     ymin = round(max(min(y0, y1, y2), 0))
     xmax = round(min(max(x0, x1, x2), 1000 - 1))
     ymax = round(min(max(y0, y1, y2), 1000 - 1))
     for x in range(xmin, xmax + 1):
         for y in range(ymin, ymax + 1):
-            l1, l2, l3 = baricentic(x, y, x0, y0, x1, y1, x2, y2)
-            if (l1 >= 0 and l2 >= 0 and l3 >= 0):
-                image_matrix[y, x] = color
+            l0, l1, l2 = baricentic(x, y, x0, y0, x1, y1, x2, y2)
+            if (l0 >= 0 and l1 >= 0 and l2 >= 0):
+                z = l0 * z0 + l1 * z1 + l2 * z2
+                if (z < z_buffer[y, x]):
+                    image_matrix[y, x] = color
+                    z_buffer[y, x] = z
 
 
 image_matrix = np.zeros((1000, 1000, 3), dtype=np.uint8)
+
 # здесь все делаем
-vertices, polygons = input_vertices("model_2.obj")  # олень
+z_buffer = np.zeros((1000, 1000), dtype=np.float32)
+z_buffer[0:1000, 0:1000] = np.inf
+
+# vertices, polygons = input_vertices("model_1.obj")  # кролик
+# for i, v in enumerate(vertices):
+#     vertices[i] = [(v[0] * 5000) + 500, ()v[1]-0.05) * 5000) + 500, (v[2] * 5000) + 500]
+
+# vertices, polygons = input_vertices("model_2.obj")  # олень
+# for i, v in enumerate(vertices):
+#     vertices[i] = [(v[0] * 0.4) + 500, ((v[1]-625) * 0.4) + 500, (v[2] * 0.4) + 500]
+
+vertices, polygons = input_vertices("cat.obj")  # кошка
 for i, v in enumerate(vertices):
-    vertices[i] = [(v[0] * 0.4) + 500, (v[1] * 0.4) + 250, (v[2] * 0.4) + 500]
+    vertices[i] = [(v[0] * 10) + 500, (v[1] * 10) + 500, (v[2] * 10) + 500]
 for p in polygons:
-    color = list(np.random.choice(range(256), size=3))
-    pict(vertices[p[0] - 1][0], vertices[p[0] - 1][1], vertices[p[1] - 1][0], vertices[p[1] - 1][1],
-         vertices[p[2] - 1][0], vertices[p[2] - 1][1], image_matrix, color)
+    n = normal(vertices[p[0] - 1][0], vertices[p[0] - 1][1], vertices[p[0] - 1][2],
+               vertices[p[1] - 1][0], vertices[p[1] - 1][1], vertices[p[1] - 1][2],
+               vertices[p[2] - 1][0], vertices[p[2] - 1][1], vertices[p[2] - 1][2])
+    scalar = np.dot(n, [0, 0, 1]) / np.linalg.norm(n)  # нормированное скалярное произведение
+    if (scalar < 0):
+        # color = list(np.random.choice(range(256), size=3))
+        color = [-248 * scalar, -24 * scalar, -148 * scalar]
+        pict(vertices[p[0] - 1][0], vertices[p[0] - 1][1], vertices[p[0] - 1][2],
+             vertices[p[1] - 1][0], vertices[p[1] - 1][1], vertices[p[1] - 1][2],
+             vertices[p[2] - 1][0], vertices[p[2] - 1][1], vertices[p[2] - 1][2], image_matrix, color)
+        if (len(p)==4):
+            pict(vertices[p[0] - 1][0], vertices[p[0] - 1][1], vertices[p[0] - 1][2],
+             vertices[p[1] - 1][0], vertices[p[1] - 1][1], vertices[p[1] - 1][2],
+             vertices[p[3] - 1][0], vertices[p[3] - 1][1], vertices[p[3] - 1][2], image_matrix, color)
 img = Image.fromarray(image_matrix, mode='RGB')
 img = ImageOps.flip(img)
-img.save('3.png')
+img.save('cat.png')
