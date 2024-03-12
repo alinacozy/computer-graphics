@@ -69,7 +69,11 @@ z_buffer[0:1000, 0:1000] = np.inf
 # for i, v in enumerate(vertices):
 #     vertices[i] = [(v[0] * 0.4) + 500, ((v[1]-625) * 0.4) + 500, (v[2] * 0.4) + 500]
 
-vertices, polygons = input_vertices("cat.obj")  # кошка
+# vertices, polygons = input_vertices("cat.obj")  # кошка
+# for i, v in enumerate(vertices):
+#     vertices[i] = [(v[0] * 10) + 500, (v[1] * 10) + 500, (v[2] * 10) + 500]
+
+vertices, polygons = input_vertices("cow.obj")  # корова
 for i, v in enumerate(vertices):
     vertices[i] = [(v[0] * 10) + 500, (v[1] * 10) + 500, (v[2] * 10) + 500]
 for p in polygons:
@@ -89,4 +93,4 @@ for p in polygons:
              vertices[p[3] - 1][0], vertices[p[3] - 1][1], vertices[p[3] - 1][2], image_matrix, color)
 img = Image.fromarray(image_matrix, mode='RGB')
 img = ImageOps.flip(img)
-img.save('cat.png')
+img.save('cow.png')
