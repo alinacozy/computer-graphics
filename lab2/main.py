@@ -56,6 +56,35 @@ def pict(x0, y0, z0, x1, y1, z1, x2, y2, z2, image_matrix, color):
                     z_buffer[y, x] = z
 
 
+def rotation_matrix(x_alpha, y_beta, z_gamma):
+    alpha = np.radians(x_alpha)
+    c, s = np.cos(alpha), np.sin(alpha)
+    rx = np.zeros((3, 3), dtype=np.float32)
+    rx[0, 0] = 1
+    rx[1, 1] = rx[2, 2] = c
+    rx[2, 1] = s
+    rx[1, 2] = -s
+
+    ry = np.zeros((3, 3), dtype=np.float32)
+    beta = np.radians(y_beta)
+    c, s = np.cos(beta), np.sin(beta)
+    ry[0, 0] = ry[2, 2] = c
+    ry[1, 1] = 1
+    ry[2, 0] = s
+    ry[0, 2] = -s
+
+    rz = np.zeros((3, 3), dtype=np.float32)
+    gamma = np.radians(z_gamma)
+    c, s = np.cos(gamma), np.sin(gamma)
+    rz[0, 0] = rz[1, 1] = c
+    rz[2, 2] = 1
+    rz[1, 0] = s
+    rz[0, 1] = -s
+
+    r = np.dot(rx, ry, rz)
+    return r
+
+
 image_matrix = np.zeros((1000, 1000, 3), dtype=np.uint8)
 
 # здесь все делаем
@@ -64,24 +93,7 @@ z_buffer[0:1000, 0:1000] = np.inf
 
 vertices, polygons = input_vertices("model_1.obj")  # кролик
 for i, v in enumerate(vertices):
-    ry = np.zeros((3, 3), dtype=np.float32)
-    theta = np.radians(150)
-    c, s = np.cos(theta), np.sin(theta)
-    ry[0, 0] = ry[2, 2] = c
-    ry[1, 1] = 1
-    ry[2, 0] = s
-    ry[0, 2] = -s
-
-    phi = np.radians(-45)
-    c, s = np.cos(phi), np.sin(phi)
-    rx = np.zeros((3, 3), dtype=np.float32)
-    rx[0, 0] = 1
-    rx[1, 1] = rx[2, 2] = c
-    rx[2, 1] = s
-    rx[1, 2] = -s
-
-    r = np.dot(rx, ry)
-    vertices[i] = np.dot(r, vertices[i])
+    vertices[i] = np.dot(rotation_matrix(30,30,30), vertices[i])
     vertices[i] = [(v[0] * 5000) + 500, ((v[1] - 0.05) * 5000) + 500, (v[2] * 5000) + 500]
 
 # vertices, polygons = input_vertices("model_2.obj")  # олень
@@ -94,25 +106,8 @@ for i, v in enumerate(vertices):
 
 # vertices, polygons = input_vertices("cow.obj")  # корова
 # for i, v in enumerate(vertices):
-#     ry = np.zeros((3, 3), dtype=np.float32)
-#     theta = np.radians(60)
-#     c, s = np.cos(theta), np.sin(theta)
-#     ry[0, 0] = ry[2, 2] = c
-#     ry[1, 1] = 1
-#     ry[2, 0] = s
-#     ry[0, 2] = -s
-#
-#     phi = np.radians(30)
-#     c, s = np.cos(phi), np.sin(phi)
-#     rx = np.zeros((3, 3), dtype=np.float32)
-#     rx[0, 0] = 1
-#     rx[1, 1] = rx[2, 2] = c
-#     rx[2, 1] = s
-#     rx[1, 2] = -s
-#
-#     r = np.dot(rx, ry)
-#     vertices[i] = np.dot(r, vertices[i])
-#     vertices[i] = [((v[0] + 25) * 10) + 500, ((v[1]+10) * 10) + 500, (v[2] * 10) + 500]
+#     vertices[i] = np.dot(rotation_matrix(80, 180, 0), vertices[i])
+#     vertices[i] = [((v[0]) * 10) + 500, ((v[1]-10) * 10) + 500, (v[2] * 10) + 500]
 
 for p in polygons:
     n = normal(vertices[p[0] - 1][0], vertices[p[0] - 1][1], vertices[p[0] - 1][2],
@@ -127,7 +122,7 @@ for p in polygons:
              vertices[p[2] - 1][0], vertices[p[2] - 1][1], vertices[p[2] - 1][2], image_matrix, color)
         if (len(p) == 4):
             pict(vertices[p[0] - 1][0], vertices[p[0] - 1][1], vertices[p[0] - 1][2],
-                 vertices[p[1] - 1][0], vertices[p[1] - 1][1], vertices[p[1] - 1][2],
+                 vertices[p[2] - 1][0], vertices[p[2] - 1][1], vertices[p[2] - 1][2],
                  vertices[p[3] - 1][0], vertices[p[3] - 1][1], vertices[p[3] - 1][2], image_matrix, color)
 img = Image.fromarray(image_matrix, mode='RGB')
 img = ImageOps.flip(img)
