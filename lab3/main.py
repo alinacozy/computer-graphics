@@ -44,18 +44,26 @@ def normal(x0, y0, z0, x1, y1, z1, x2, y2, z2):
     return n
 
 
-def pict(x0, y0, z0, x1, y1, z1, x2, y2, z2, image_matrix, color):
+def pict(x0, y0, z0, x1, y1, z1, x2, y2, z2, image_matrix, intensity0, intensity1, intensity2, u0, v0, u1, v1, u2, v2,
+         texture_img):
     xmin = round(max(min(x0, x1, x2), 0))
     ymin = round(max(min(y0, y1, y2), 0))
     xmax = round(min(max(x0, x1, x2), 1000 - 1))
     ymax = round(min(max(y0, y1, y2), 1000 - 1))
+    width, height, colors=texture_img.shape
     for x in range(xmin, xmax + 1):
         for y in range(ymin, ymax + 1):
             l0, l1, l2 = baricentic(x, y, x0, y0, x1, y1, x2, y2)
             if (l0 >= 0 and l1 >= 0 and l2 >= 0):
                 z = l0 * z0 + l1 * z1 + l2 * z2
                 if (z < z_buffer[y, x]):
-                    image_matrix[y, x] = color
+                    intensity_for_pixel = -(intensity0*l0+intensity1*l1+intensity2*l2)
+                    if (intensity_for_pixel<0):
+                        intensity_for_pixel=0
+                    color=texture_img[round(width*(l0*u0+l1*u1+l2*u2))][ round(height * (l0*v0+l1*v1+l2*v2))]
+                    # color =np.array([248, 24, 148]) #розовый
+                    #color = np.array([0, 128, 255]) #голубой
+                    image_matrix[y, x] = intensity_for_pixel * color
                     z_buffer[y, x] = z
 
 
@@ -88,74 +96,92 @@ def rotation_matrix(x_alpha, y_beta, z_gamma):
     return r
 
 
-image_matrix = np.zeros((1000, 1000, 3), dtype=np.uint8)
+for num_of_image in range(0, 1):
+    #print(num_of_image)
+    image_matrix = np.zeros((1000, 1000, 3), dtype=np.uint8)
 
-# здесь все делаем
-z_buffer = np.zeros((1000, 1000), dtype=np.float32)
-z_buffer[0:1000, 0:1000] = np.inf
+    # здесь все делаем
+    z_buffer = np.zeros((1000, 1000), dtype=np.float32)
+    z_buffer[0:1000, 0:1000] = np.inf
 
-# vertices, polygons = input_vertices("model_1.obj")  # кролик
-# p_vertices=np.zeros(vertices.shape);  #массив для проецированных вершин
-# for i, v in enumerate(vertices):
-#     vertices[i] = np.dot(rotation_matrix(0,90,0), vertices[i])
-#     vertices[i] = [v[0], v[1] - 0.05, v[2]+0.5] #сдвиг модели
-#     p_vertices[i] = [(v[0]/v[2] * 3500) + 500, (v[1]/v[2] * 3500) + 500, 1]
+    # vertices, polygons = input_vertices("model_1.obj")  # кролик
+    # p_vertices=np.zeros(vertices.shape);  #массив для проецированных вершин
+    # for i, v in enumerate(vertices):
+    #     vertices[i] = np.dot(rotation_matrix(0,90,0), vertices[i])
+    #     vertices[i] = [v[0], v[1] - 0.05, v[2]+0.5] #сдвиг модели
+    #     p_vertices[i] = [(v[0]/v[2] * 3500) + 500, (v[1]/v[2] * 3500) + 500, 1]
 
-# vertices, polygons = input_vertices("model_2.obj")  # олень
-# for i, v in enumerate(vertices):
-#     vertices[i] = [(v[0] * 0.4) + 500, ((v[1]-625) * 0.4) + 500, (v[2] * 0.4) + 500]
+    # vertices, polygons = input_vertices("model_2.obj")  # олень
+    # for i, v in enumerate(vertices):
+    #     vertices[i] = [(v[0] * 0.4) + 500, ((v[1]-625) * 0.4) + 500, (v[2] * 0.4) + 500]
 
-# vertices, polygons = input_vertices("cat.obj")  # кошка
-# p_vertices=np.zeros(vertices.shape);  #массив для проецированных вершин
-# for i, v in enumerate(vertices):
-#     vertices[i] = np.dot(rotation_matrix(240,0,160), vertices[i])
-#     vertices[i] = [v[0]-7, v[1]-20, v[2]+40] #сдвиг модели
-#     p_vertices[i] = [(v[0]/v[2] * 400) + 500, (v[1]/v[2] * 400) + 500, 1]
+    # vertices, polygons, textures = input_vertices("cat.obj")  # кошка
+    # p_vertices=np.zeros(vertices.shape);  #массив для проецированных вершин
+    # for i, v in enumerate(vertices):
+    #     vertices[i] = np.dot(rotation_matrix(240,0,160+5*num_of_image), vertices[i])
+    #     vertices[i] = [v[0]-7, v[1]-20, v[2]+100] #сдвиг модели
+    #     p_vertices[i] = [(v[0]/v[2] * 1000) + 500, (v[1]/v[2] * 1000) + 500, 1]
 
-vertices, polygons, textures = input_vertices("ferret.obj")  # хорек
-p_vertices=np.zeros(vertices.shape)  # массив для проецированных вершин
-for i, v in enumerate(vertices):
-    vertices[i] = np.dot(rotation_matrix(270,0,270), vertices[i])
-    vertices[i] = [v[0]-7, v[1]-20, v[2]+100] # сдвиг модели
-    p_vertices[i] = [(v[0]/v[2] * 1000) + 500, (v[1]/v[2] * 1000) + 500, 1]
+    vertices, polygons, textures = input_vertices("ferret.obj")  # хорек
 
-# vertices, polygons = input_vertices("cow.obj")  # корова
-# for i, v in enumerate(vertices):
-#     vertices[i] = np.dot(rotation_matrix(80, 180, 0), vertices[i])
-#     vertices[i] = [((v[0]) * 10) + 500, ((v[1]-10) * 10) + 500, (v[2] * 10) + 500]
+    p_vertices=np.zeros(vertices.shape)  # массив для проецированных вершин
+    for i, v in enumerate(vertices):
+        vertices[i] = np.dot(rotation_matrix(270, 0,270+num_of_image*10), vertices[i])
+        vertices[i] = [v[0]-7, v[1]-20, v[2]+100] # сдвиг модели
+        p_vertices[i] = [(v[0]/v[2] * 1000) + 500, (v[1]/v[2] * 1000) + 500, 1]
 
-normals_to_vertices=np.zeros(vertices.shape)
-for i in range(len(polygons['v'])):
-    #считаем нормаль к полигону
-    n = normal(vertices[polygons['v'][i][0] - 1][0], vertices[polygons['v'][i][0] - 1][1],
-               vertices[polygons['v'][i][0] - 1][2],
-               vertices[polygons['v'][i][1] - 1][0], vertices[polygons['v'][i][1] - 1][1],
-               vertices[polygons['v'][i][1] - 1][2],
-               vertices[polygons['v'][i][2] - 1][0], vertices[polygons['v'][i][2] - 1][1],
-               vertices[polygons['v'][i][2] - 1][2])
-    for j in range(polygons['v'][i]):
-        #прибавляем нормаль к полигону ко всем вершинам, которые есть в полигоне
-        normals_to_vertices[polygons['v'][i][j]] += n
-intensity=[]
-for i in range(len(normals_to_vertices)):
-    normals_to_vertices[i]/=np.linalg.norm(normals_to_vertices[i]) #нормировали нормали
-    intensity.append(normals_to_vertices[i][2])
+    # vertices, polygons = input_vertices("cow.obj")  # корова
+    # for i, v in enumerate(vertices):
+    #     vertices[i] = np.dot(rotation_matrix(80, 180, 0), vertices[i])
+    #     vertices[i] = [((v[0]) * 10) + 500, ((v[1]-10) * 10) + 500, (v[2] * 10) + 500]
 
-for i in range(len(polygons['v'])):
-    n = normal(vertices[polygons['v'][i][0] - 1][0], vertices[polygons['v'][i][0] - 1][1], vertices[polygons['v'][i][0] - 1][2],
-               vertices[polygons['v'][i][1] - 1][0], vertices[polygons['v'][i][1] - 1][1], vertices[polygons['v'][i][1] - 1][2],
-               vertices[polygons['v'][i][2] - 1][0], vertices[polygons['v'][i][2] - 1][1], vertices[polygons['v'][i][2] - 1][2])
-    scalar = np.dot(n, [0, 0, 1]) / np.linalg.norm(n)  # нормированное скалярное произведение
-    if (scalar < 0):
-        # color = list(np.random.choice(range(256), size=3))
-        color = [-248 * scalar, -24 * scalar, -148 * scalar]
-        pict(p_vertices[polygons['v'][i][0] - 1][0], p_vertices[polygons['v'][i][0] - 1][1], vertices[polygons['v'][i][0] - 1][2],
-             p_vertices[polygons['v'][i][1] - 1][0], p_vertices[polygons['v'][i][1] - 1][1], vertices[polygons['v'][i][1] - 1][2],
-             p_vertices[polygons['v'][i][2] - 1][0], p_vertices[polygons['v'][i][2] - 1][1], vertices[polygons['v'][i][2] - 1][2], image_matrix, color)
-        if (len(polygons['v'][i]) == 4):
+    normals_to_vertices=np.zeros(vertices.shape)
+    for i in range(len(polygons['v'])):
+        #считаем нормаль к полигону
+        n = normal(vertices[polygons['v'][i][0] - 1][0], vertices[polygons['v'][i][0] - 1][1],
+                   vertices[polygons['v'][i][0] - 1][2],
+                   vertices[polygons['v'][i][1] - 1][0], vertices[polygons['v'][i][1] - 1][1],
+                   vertices[polygons['v'][i][1] - 1][2],
+                   vertices[polygons['v'][i][2] - 1][0], vertices[polygons['v'][i][2] - 1][1],
+                   vertices[polygons['v'][i][2] - 1][2])
+        for j in range(len(polygons['v'][i])):
+            #прибавляем нормаль к полигону ко всем вершинам, которые есть в полигоне
+            normals_to_vertices[polygons['v'][i][j]-1] += n
+    intensity=[]
+    for i in range(len(normals_to_vertices)):
+        normals_to_vertices[i]/=np.linalg.norm(normals_to_vertices[i]) #нормировали нормали
+        intensity.append(normals_to_vertices[i][2])
+
+    texture_image=Image.open("ferret_texture.jpg")
+    texture_image_np=np.array(texture_image)
+    for i in range(len(polygons['v'])):
+        n = normal(vertices[polygons['v'][i][0] - 1][0], vertices[polygons['v'][i][0] - 1][1], vertices[polygons['v'][i][0] - 1][2],
+                   vertices[polygons['v'][i][1] - 1][0], vertices[polygons['v'][i][1] - 1][1], vertices[polygons['v'][i][1] - 1][2],
+                   vertices[polygons['v'][i][2] - 1][0], vertices[polygons['v'][i][2] - 1][1], vertices[polygons['v'][i][2] - 1][2])
+        scalar = np.dot(n, [0, 0, 1]) / np.linalg.norm(n)  # нормированное скалярное произведение
+        if (scalar < 0):
+            # color = list(np.random.choice(range(256), size=3))
+            color = np.array([248.0, 24.0, 148.0])
+
+
             pict(p_vertices[polygons['v'][i][0] - 1][0], p_vertices[polygons['v'][i][0] - 1][1], vertices[polygons['v'][i][0] - 1][2],
-                 p_vertices[polygons['v'][i][2] - 1][0], p_vertices[polygons['v'][i][2] - 1][1], vertices[polygons['v'][i][2] - 1][2],
-                 p_vertices[polygons['v'][i][3] - 1][0], p_vertices[polygons['v'][i][3] - 1][1], vertices[polygons['v'][i][3] - 1][2], image_matrix, color)
-img = Image.fromarray(image_matrix, mode='RGB')
-img = ImageOps.flip(img)
-img.save('ferret.png')
+                 p_vertices[polygons['v'][i][1] - 1][0], p_vertices[polygons['v'][i][1] - 1][1], vertices[polygons['v'][i][1] - 1][2],
+                 p_vertices[polygons['v'][i][2] - 1][0], p_vertices[polygons['v'][i][2] - 1][1], vertices[polygons['v'][i][2] - 1][2], image_matrix,
+                 intensity[polygons['v'][i][0] - 1], intensity[polygons['v'][i][1] - 1], intensity[polygons['v'][i][2] - 1],
+                 textures[polygons['v'][i][0]-1][0], textures[polygons['v'][i][0]-1][1],
+                 textures[polygons['v'][i][1]-1][0], textures[polygons['v'][i][1]-1][1],
+                 textures[polygons['v'][i][2]-1][0], textures[polygons['v'][i][2]-1][1],
+                 texture_image_np)
+            if (len(polygons['v'][i]) == 4):
+                pict(p_vertices[polygons['v'][i][0] - 1][0], p_vertices[polygons['v'][i][0] - 1][1], vertices[polygons['v'][i][0] - 1][2],
+                     p_vertices[polygons['v'][i][2] - 1][0], p_vertices[polygons['v'][i][2] - 1][1], vertices[polygons['v'][i][2] - 1][2],
+                     p_vertices[polygons['v'][i][3] - 1][0], p_vertices[polygons['v'][i][3] - 1][1], vertices[polygons['v'][i][3] - 1][2], image_matrix,
+                     intensity[polygons['v'][i][0] - 1], intensity[polygons['v'][i][2] - 1], intensity[polygons['v'][i][3] - 1],
+                     textures[polygons['v'][i][0] - 1][0], textures[polygons['v'][i][0] - 1][1],
+                     textures[polygons['v'][i][2] - 1][0], textures[polygons['v'][i][2] - 1][1],
+                     textures[polygons['v'][i][3] - 1][0], textures[polygons['v'][i][3] - 1][1],
+                     texture_image_np)
+    img = Image.fromarray(image_matrix, mode='RGB')
+    img = ImageOps.flip(img)
+    #img.save(f'cat/{num_of_image}.png')
+    img.save('ferret.png')
